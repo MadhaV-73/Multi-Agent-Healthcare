@@ -1,16 +1,21 @@
-# 🏥 Multi-Agent Healthcare Platform
+# 🫁 Multi-Agent Healthcare Platform - Chest X-Ray Analysis
 
-A comprehensive healthcare platform with AI-powered diagnostics, patient analysis, and therapy recommendations built using a multi-agent architecture.
+An AI-powered respiratory healthcare platform for **chest X-ray analysis and OTC treatment recommendations** using a multi-agent architecture. Specialized in detecting pneumonia, bronchitis, COVID-19, TB, and providing location-aware pharmacy matching in Mumbai region.
 
 ## 🌟 Key Features
 
-- **🩺 Patient Analysis**: Comprehensive patient data collection and medical document processing
-- **🔬 AI Diagnostics**: Advanced X-ray analysis and intelligent therapy recommendations
-- **💊 Smart Pharmacy Matching**: Location-aware pharmacy inventory matching with real-time availability
-- **👨‍⚕️ Doctor Consultation**: Specialist matching and appointment scheduling
-- **📄 Document Processing**: Multi-file upload support with OCR and PII masking
-- **🔍 Observability**: Agent-by-agent event logs and reservation tracing
-- **🚀 REST API**: Full FastAPI backend with automatic documentation
+- **� Chest X-Ray Analysis**: AI-powered detection of respira## 👨‍💻 Author
+
+**MadhaV** (MadhaV-73)
+- GitHub: [@MadhaV-73](https://github.com/MadhaV-73)
+- Repository: [Multi-Agent-Healthcare-GL](https://github.com/MadhaV-73/Multi-Agent-Healthcare-GL) conditions (Pneumonia, Bronchitis, TB, COVID-19 suspect, Normal)
+- **🩺 Patient Intake**: Specialized intake for respiratory symptoms and chest analysis
+- **💊 OTC Respiratory Therapy**: Smart recommendations for cough, fever, congestion, breathing issues
+- **🏥 Pharmacy Matching**: Location-aware pharmacy inventory with respiratory medicine stock
+- **👨‍⚕️ Pulmonologist Consultation**: Automatic escalation to respiratory specialists when needed
+- **📄 Medical Document Processing**: Multi-file upload with OCR for chest X-ray reports
+- **🔍 Full Observability**: Agent-by-agent event logs and decision tracing
+- **🚀 REST API**: Production-ready FastAPI backend with automatic documentation
 
 ## 📍 Sample Data Coverage
 
@@ -29,32 +34,73 @@ The system ships with comprehensive sample data for **Mumbai Metropolitan Region
 
 ### Dataset Details:
 - **Total Pharmacies**: 1500 across Mumbai metropolitan region
-- **Inventory Records**: 1500+ with 30 OTC medicines
-- **Doctors**: 20 specialists across various fields
-- **Coverage**: Complete pharmacy coverage for all listed cities
+- **Inventory Records**: 1500+ with 30+ respiratory/OTC medicines
+- **Doctors**: 20 specialists (Pulmonologists, Infectious Disease, General Physicians)
+- **Medicine Categories**: 
+  - Fever reducers (Paracetamol, Ibuprofen, Acetaminophen)
+  - Cough suppressants (Dextromethorphan, Cough Syrup)
+  - Expectorants (Guaifenesin, Mucolytic Syrup, Ambroxol)
+  - Inhalers (Salbutamol, Budesonide)
+  - Decongestants (Pseudoephedrine, Phenylephrine)
+  - Bronchodilators and antihistamines (Cetirizine, Loratadine)
+  - Respiratory support (Nebulizer Solution, Chest Rub, Steam Inhalation)
 
-**All cities in the dropdown have full pharmacy matching support!**
+**All cities in the dropdown have full pharmacy matching support in Mumbai region!**
+
+### Supported Respiratory Conditions:
+- ✅ **Pneumonia** - Bacterial or viral lung infection
+- ✅ **Bronchitis** - Inflammation of bronchial tubes
+- ✅ **COVID-19 Suspect** - Potential coronavirus infection
+- ✅ **TB Suspect** - Possible tuberculosis (escalated to specialist)
+- ✅ **Normal** - Healthy chest X-ray
 
 ## 🏗️ Architecture
 
 ```
-Frontend (Streamlit) ←→ Backend API (FastAPI) ←→ AI Agents
+Frontend (Streamlit) ←→ Backend API (FastAPI) ←→ Multi-Agent Pipeline
      Port 8501              Port 8000
+                                         
+                                         ↓
+                              ┌──────────────────────┐
+                              │  Coordinator Agent   │
+                              └──────────────────────┘
+                                         ↓
+              ┌──────────────────────────┼──────────────────────────┐
+              ↓                          ↓                          ↓
+    ┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
+    │ Ingestion Agent │      │  Imaging Agent  │      │  Therapy Agent  │
+    │  (Patient Data) │  →   │ (Chest X-Ray AI)│  →   │ (OTC Medicines) │
+    └─────────────────┘      └─────────────────┘      └─────────────────┘
+                                                                  ↓
+                                            ┌─────────────────────┴─────────────────┐
+                                            ↓                                       ↓
+                                   ┌─────────────────┐                  ┌─────────────────┐
+                                   │ Pharmacy Agent  │                  │  Doctor Agent   │
+                                   │ (Stock/Location)│                  │ (Pulmonologist) │
+                                   └─────────────────┘                  └─────────────────┘
 ```
+
+**Agent Pipeline Flow:**
+1. **Ingestion** → Validates patient data & uploads chest X-ray
+2. **Imaging** → AI classifies respiratory condition from X-ray
+3. **Therapy** → Recommends OTC medicines based on condition
+4. **Pharmacy** → Finds nearest pharmacies with stock
+5. **Doctor** → Books pulmonologist if escalation needed
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.11+ (Recommended: 3.11 for best compatibility)
 - pip (Python package manager)
 - Git (optional, for cloning)
+- 4GB RAM minimum, 8GB recommended
 
 ### Installation & Setup
 
 #### 1️⃣ Clone or Download the Repository
 ```powershell
-git clone https://github.com/parth3083/multi-agent-healthcare.git
-cd multi-agent-healthcare
+git clone https://github.com/MadhaV-73/Multi-Agent-Healthcare-GL.git
+cd Multi-Agent-Healthcare-GL
 ```
 
 #### 2️⃣ Create Virtual Environment
@@ -216,17 +262,17 @@ DEBUG_MODE=False
 ```
 
 ### Configuration Files
-- **`config.py`**: Central configuration for paths, thresholds, and system settings
-- **`utils/api_client.py`**: API client configuration
-```python
-api_client = HealthCareAPIClient(base_url="http://localhost:8000")
-```
+- **`config.py`**: Central configuration for paths, thresholds, system settings
+  - SpO2 thresholds for severity classification
+  - Pharmacy search radius: 25km
+  - Image processing: Max 10MB, formats PNG/JPG/JPEG
+  - Delivery speed: 30 km/h for ETA calculations
+  - Dosage database for 30+ respiratory medicines
 
-### Key Settings (in `config.py`)
-- **SpO2 Thresholds**: Oxygen saturation levels for severity classification
-- **Pharmacy Search Radius**: Default 25km, configurable
-- **Image Processing**: Max size 10MB, supported formats: PNG, JPG, JPEG
-- **Delivery Speed**: Assumed 30 km/h for ETA calculations
+- **`app_integrated.py`**: Frontend with multi-source API configuration
+  - Priority: Streamlit secrets > Environment variable > Production URL
+  - Filters: Mumbai region only (109 pincodes), respiratory symptoms only
+  - Default backend: https://multi-agent-healthcare-gl-1.onrender.com
 
 ## 🧪 Testing with Postman
 
@@ -347,16 +393,18 @@ DEBUG_CONFIG = {
 
 ## 🎯 Tech Stack
 
-- **Backend**: FastAPI, Uvicorn
-- **Frontend**: Streamlit
+- **Backend**: FastAPI 0.115+, Uvicorn (Deployed on Render)
+- **Frontend**: Streamlit 1.40+ (Deployed on Streamlit Cloud)
 - **Data Processing**: Pandas, NumPy
 - **Document Processing**: PyPDF2, pdfplumber, Pillow
 - **Testing**: Pytest
-- **AI/ML**: Custom classifiers for medical imaging
+- **AI/ML**: Custom classifiers for chest X-ray analysis
+- **Deployment**: Render (Backend), Streamlit Cloud (Frontend)
 
 ## 📚 Additional Resources
 
-- [API Documentation](http://localhost:8000/docs) - Interactive API docs (Swagger UI)
+- **Live Backend API**: https://multi-agent-healthcare-gl-1.onrender.com
+- [API Documentation](https://multi-agent-healthcare-gl-1.onrender.com/docs) - Interactive Swagger UI
 - [Architecture Overview](docs/TARGET_ARCHITECTURE.md) - System architecture details
 - [Deployment Guide](DEPLOYMENT_INSTRUCTIONS.md) - Production deployment instructions
 
@@ -403,10 +451,15 @@ For issues or questions:
 
 ## 🔗 Quick Links
 
+### Local Development:
 - 🌐 **Backend API**: http://localhost:8000
 - 📖 **API Docs**: http://localhost:8000/docs
 - 🖥️ **Frontend UI**: http://localhost:8501
-- 📊 **Project Repository**: https://github.com/parth3083/multi-agent-healthcare
+
+### Production (Deployed):
+- 🚀 **Live Backend**: https://multi-agent-healthcare-gl-1.onrender.com
+- � **Live API Docs**: https://multi-agent-healthcare-gl-1.onrender.com/docs
+- 📊 **GitHub Repository**: https://github.com/MadhaV-73/Multi-Agent-Healthcare-GL
 
 ---
 
