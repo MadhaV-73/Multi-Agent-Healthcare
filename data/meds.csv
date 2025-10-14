@@ -1,0 +1,31 @@
+sku,drug_name,indication,age_min,contra_allergy_keywords,form,strength,otc_status
+OTC001,Paracetamol,fever pain headache,0,paracetamol acetaminophen,Tablet,500mg,OTC
+OTC002,Ibuprofen,pain inflammation fever,12,ibuprofen nsaid aspirin,Tablet,200mg,OTC
+OTC003,Cetirizine,cold rhinitis breathing,6,cetirizine antihistamine,Tablet,10mg,OTC
+OTC005,Cough Syrup,cough cold bronchitis,2,codeine,Syrup,100ml,OTC
+OTC006,Vitamin C,immunity cold fever,0,none,Tablet,500mg,OTC
+OTC007,Zinc Supplement,immunity cold fever,12,none,Tablet,50mg,OTC
+OTC008,Chlorpheniramine,cold breathing congestion,6,antihistamine,Tablet,4mg,OTC
+OTC009,Dextromethorphan,dry cough chest,12,dextromethorphan,Syrup,100ml,OTC
+OTC010,Guaifenesin,chest congestion mucus,6,guaifenesin expectorant,Syrup,100ml,OTC
+OTC011,Loratadine,breathing cold fever,6,loratadine antihistamine,Tablet,10mg,OTC
+OTC013,Aspirin,pain fever inflammation,18,aspirin nsaid salicylate,Tablet,325mg,OTC
+OTC015,Acetaminophen,fever pain headache,0,paracetamol acetaminophen,Tablet,325mg,OTC
+OTC016,Pseudoephedrine,congestion cold breathing,12,pseudoephedrine decongestant,Tablet,30mg,OTC
+OTC017,Phenylephrine,congestion breathing chest,12,phenylephrine,Tablet,10mg,OTC
+OTC023,Throat Lozenges,cough cold pain,6,none,Lozenge,24 count,OTC
+OTC026,Multivitamin,immunity cold fever,12,none,Tablet,Daily,OTC
+OTC030,Saline Nasal Spray,congestion breathing cold,0,none,Spray,30ml,OTC
+OTC031,Ambroxol,cough mucus chest,6,none,Tablet,30mg,OTC
+OTC032,Salbutamol Inhaler,breathing wheezing bronchitis,12,salbutamol,Inhaler,100mcg,OTC
+OTC033,Budesonide Inhaler,breathing inflammation chest,18,budesonide steroid,Inhaler,200mcg,OTC
+OTC034,Mucolytic Syrup,mucus chest congestion,2,none,Syrup,100ml,OTC
+OTC035,Antihistamine Syrup,cold breathing fever,2,antihistamine,Syrup,100ml,OTC
+OTC036,Expectorant Tablets,cough chest mucus,12,none,Tablet,200mg,OTC
+OTC037,Bronchodilator,breathing wheezing chest,18,none,Tablet,4mg,OTC
+OTC038,Steam Inhalation,congestion breathing cold,0,none,Solution,100ml,OTC
+OTC039,Chest Rub Balm,congestion cold chest,2,camphor menthol,Balm,50g,OTC
+OTC040,Antibiotic Respiratory,pneumonia bronchitis infection,18,penicillin,Tablet,500mg,Prescription
+OTC041,Steroid Respiratory,inflammation breathing chest,18,steroid,Tablet,5mg,Prescription
+OTC042,Oxygen Support,breathing chest pneumonia,0,none,Cylinder,Portable,Medical
+OTC043,Nebulizer Solution,breathing wheezing bronchitis,0,none,Solution,2.5ml,OTC
