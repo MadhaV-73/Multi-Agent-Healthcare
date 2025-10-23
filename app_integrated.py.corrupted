@@ -23,7 +23,26 @@ if not API_BASE_URL:
     API_BASE_URL = os.getenv("API_BASE_URL", "https://multi-agent-healthcare-gl-1.onrender.com")
 
 # Remove trailing slash if present
-API_BASE_URL = API_BASE_URL.rstrip("/")
+API_BASE_URL = API_BASE_URL            # Display location info prominently
+            location_match = pharmacy.get('location_match', 'nearby')
+            match_icon = "✅" if location_match == 'exact_pincode' else "📍" if location_match == 'same_city' else "📌"
+            match_text = {
+                'exact_pincode': 'Exact Pincode Match',
+                'same_city': 'Same City',
+                'nearby': 'Nearby Area'
+            }.get(location_match, 'Matched')
+            
+            location_info_cols = st.columns(3)
+            location_info_cols[0].info(f"📍 **City:** {pharmacy.get('city', 'N/A')}")
+            location_info_cols[1].info(f"📮 **Pincode:** {pharmacy.get('pincode', 'N/A')}")
+            
+            # Show match quality
+            if location_match == 'exact_pincode':
+                location_info_cols[2].success(f"{match_icon} **{match_text}**")
+            elif location_match == 'same_city':
+                location_info_cols[2].info(f"{match_icon} **{match_text}**")
+            else:
+                location_info_cols[2].warning(f"{match_icon} **{match_text}**")rip("/")
 
 
 @st.cache_data(show_spinner=False)
@@ -653,26 +672,10 @@ def display_analysis_results(result):
             header_cols[2].metric("ETA", f"{pharmacy.get('eta_min', 0)} min")
             header_cols[3].metric("Delivery Fee", f"₹{pharmacy.get('delivery_fee', 0):.2f}")
 
-            # Display location info prominently with match quality
-            location_match = pharmacy.get('location_match', 'nearby')
-            match_icon = "✅" if location_match == 'exact_pincode' else "📍" if location_match == 'same_city' else "📌"
-            match_text = {
-                'exact_pincode': 'Exact Pincode Match',
-                'same_city': 'Same City',
-                'nearby': 'Nearby Area'
-            }.get(location_match, 'Matched')
-            
-            location_info_cols = st.columns(3)
+            # Display location info prominently
+            location_info_cols = st.columns(2)
             location_info_cols[0].info(f"📍 **City:** {pharmacy.get('city', 'N/A')}")
-            location_info_cols[1].info(f"📮 **Pincode:** {pharmacy.get('pincode', 'N/A')}")
-            
-            # Show match quality indicator
-            if location_match == 'exact_pincode':
-                location_info_cols[2].success(f"{match_icon} **{match_text}**")
-            elif location_match == 'same_city':
-                location_info_cols[2].info(f"{match_icon} **{match_text}**")
-            else:
-                location_info_cols[2].warning(f"{match_icon} **{match_text}**")
+            location_info_cols[1].info(f"� **Pincode:** {pharmacy.get('pincode', 'N/A')}")
 
             services = pharmacy.get('services') or []
             if services:
