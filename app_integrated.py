@@ -23,7 +23,26 @@ if not API_BASE_URL:
     API_BASE_URL = os.getenv("API_BASE_URL", "https://multi-agent-healthcare-gl-1.onrender.com")
 
 # Remove trailing slash if present
-API_BASE_URL = API_BASE_URL.rstrip("/")
+API_BASE_URL = API_BASE_URL            # Display location info prominently
+            location_match = pharmacy.get('location_match', 'nearby')
+            match_icon = "✅" if location_match == 'exact_pincode' else "📍" if location_match == 'same_city' else "📌"
+            match_text = {
+                'exact_pincode': 'Exact Pincode Match',
+                'same_city': 'Same City',
+                'nearby': 'Nearby Area'
+            }.get(location_match, 'Matched')
+            
+            location_info_cols = st.columns(3)
+            location_info_cols[0].info(f"📍 **City:** {pharmacy.get('city', 'N/A')}")
+            location_info_cols[1].info(f"📮 **Pincode:** {pharmacy.get('pincode', 'N/A')}")
+            
+            # Show match quality
+            if location_match == 'exact_pincode':
+                location_info_cols[2].success(f"{match_icon} **{match_text}**")
+            elif location_match == 'same_city':
+                location_info_cols[2].info(f"{match_icon} **{match_text}**")
+            else:
+                location_info_cols[2].warning(f"{match_icon} **{match_text}**")rip("/")
 
 
 @st.cache_data(show_spinner=False)
@@ -209,12 +228,19 @@ def patient_intake_page():
 
         with col2:
             selected_city = st.selectbox("City", city_options)
-            city_pin_df = zip_df[zip_df["City"] == selected_city]
-            pincode = st.selectbox(
-                "Pincode",
-                city_pin_df["pincode"].tolist(),
-                help="Loaded from sample zipcode coverage",
-            )
+            # Filter pincodes by selected city (case-sensitive column name "city")
+            city_pin_df = zip_df[zip_df["city"] == selected_city]
+            pincode_options = city_pin_df["pincode"].tolist() if not city_pin_df.empty else []
+            
+            if not pincode_options:
+                st.warning(f"No pincodes found for {selected_city}")
+                pincode = st.text_input("Enter Pincode", help="6-digit pincode")
+            else:
+                pincode = st.selectbox(
+                    "Pincode",
+                    pincode_options,
+                    help=f"Available pincodes for {selected_city}",
+                )
 
         symptom_labels = list(symptom_display.keys())
         default_symptoms = symptom_labels[:1] if symptom_labels else []
@@ -296,12 +322,19 @@ def xray_analysis_page():
             age = st.number_input("Age", min_value=1, max_value=120, value=40, help="Required for dosage safety checks")
             gender = st.selectbox("Gender", ["M", "F", "U"], help="Used for anonymised patient context")
             selected_city = st.selectbox("City", zip_df["city"].unique().tolist(), help="Loaded from sample zipcode coverage")
+            # Filter pincodes by selected city
             city_subset = zip_df[zip_df["city"] == selected_city]
-            zip_code = st.selectbox(
-                "ZIP / PIN Code",
-                city_subset["pincode"].tolist(),
-                help="Helps the pharmacy matcher estimate delivery ETA",
-            )
+            pincode_options = city_subset["pincode"].tolist() if not city_subset.empty else []
+            
+            if not pincode_options:
+                st.warning(f"No pincodes found for {selected_city}")
+                zip_code = st.text_input("Enter ZIP/PIN Code", help="6-digit pincode")
+            else:
+                zip_code = st.selectbox(
+                    "ZIP / PIN Code",
+                    pincode_options,
+                    help=f"Available pincodes for {selected_city} - helps pharmacy matcher",
+                )
             selected_meds = st.multiselect(
                 "Current Medications",
                 med_names,

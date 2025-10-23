@@ -131,7 +131,9 @@ class PharmacyAgent:
             # Find nearby pharmacies
             nearby_pharmacies = self._find_nearby_pharmacies(
                 patient_coords,
-                self.max_search_radius_km
+                self.max_search_radius_km,
+                patient_city=location_context.get("city"),
+                patient_pincode=location_context.get("pincode")
             )
             
             if not nearby_pharmacies:
@@ -275,17 +277,21 @@ class PharmacyAgent:
     def _find_nearby_pharmacies(
         self,
         patient_coords: Tuple[float, float],
-        max_radius_km: float
+        max_radius_km: float,
+        patient_city: Optional[str] = None,
+        patient_pincode: Optional[str] = None
     ) -> List[Dict]:
         """
-        Find pharmacies within delivery radius.
+        Find pharmacies within delivery radius, prioritizing same city/pincode.
         
         Args:
             patient_coords: (lat, lon) of patient
             max_radius_km: Maximum search radius
+            patient_city: Patient's city for prioritization
+            patient_pincode: Patient's pincode for exact matching
             
         Returns:
-            List of pharmacy dicts with distance calculated
+            List of pharmacy dicts with distance calculated, sorted by priority
         """
         nearby = []
         patient_lat, patient_lon = patient_coords
@@ -303,12 +309,32 @@ class PharmacyAgent:
             if distance <= min(max_radius_km, pharmacy_delivery_km):
                 pharmacy_dict = pharmacy.to_dict()
                 pharmacy_dict['distance_km'] = round(distance, 2)
+                
+                # Calculate priority score (lower is better)
+                # Priority: exact pincode match > same city > distance
+                priority_score = distance
+                
+                if patient_pincode and str(pharmacy.get('pincode', '')) == str(patient_pincode):
+                    priority_score -= 1000  # Exact pincode match gets highest priority
+                    pharmacy_dict['location_match'] = 'exact_pincode'
+                elif patient_city and str(pharmacy.get('city', '')).lower() == str(patient_city).lower():
+                    priority_score -= 500  # Same city gets second priority
+                    pharmacy_dict['location_match'] = 'same_city'
+                else:
+                    pharmacy_dict['location_match'] = 'nearby'
+                
+                pharmacy_dict['priority_score'] = priority_score
                 nearby.append(pharmacy_dict)
         
-        # Sort by distance (closest first)
-        nearby.sort(key=lambda x: x['distance_km'])
+        # Sort by priority score (exact pincode > same city > closest)
+        nearby.sort(key=lambda x: x['priority_score'])
         
-        self._log("INFO", f"Found {len(nearby)} pharmacies within {max_radius_km}km")
+        match_stats = {}
+        for p in nearby:
+            match_type = p.get('location_match', 'nearby')
+            match_stats[match_type] = match_stats.get(match_type, 0) + 1
+        
+        self._log("INFO", f"Found {len(nearby)} pharmacies within {max_radius_km}km - {match_stats}")
         
         return nearby
     
@@ -462,13 +488,15 @@ class PharmacyAgent:
             "pharmacy_name": pharmacy['name'],
             "pharmacy_address": f"{pharmacy['name']} - {pharmacy['lat']:.4f}, {pharmacy['lon']:.4f}",
             "distance_km": distance_km,
-            "city": location_context.get("city", ""),
-            "pincode": location_context.get("pincode", ""),
+            "city": pharmacy.get('city', location_context.get("city", "")),
+            "pincode": pharmacy.get('pincode', location_context.get("pincode", "")),
+            "location_match": pharmacy.get('location_match', 'nearby'),
             "services": pharmacy.get('services', []),
             "estimated_delivery": (datetime.now() + timedelta(minutes=eta_minutes)).isoformat(),
             "timestamp": datetime.now().isoformat(),
             "reservation_id": reservation_id,
             "reservation_expires_at": reservation_expires.isoformat(),
+            "reserved_units": sum(item["qty"] for item in reserved_items),
             "status": "success"
         }
 
