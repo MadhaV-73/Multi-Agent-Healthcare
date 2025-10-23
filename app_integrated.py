@@ -196,6 +196,28 @@ def patient_intake_page():
     symptom_display = {tag.replace("_", " ").title(): tag for tag in symptom_tags}
     allergy_display = {tag.replace("_", " ").title(): tag for tag in allergy_tags}
 
+    # City and Pincode selection OUTSIDE form for dynamic updates
+    st.markdown("### 📍 Location")
+    loc_col1, loc_col2 = st.columns(2)
+    with loc_col1:
+        selected_city = st.selectbox("City", city_options, key="patient_city")
+    with loc_col2:
+        # Filter pincodes by selected city (case-sensitive column name "city")
+        city_pin_df = zip_df[zip_df["city"] == selected_city]
+        pincode_options = city_pin_df["pincode"].tolist() if not city_pin_df.empty else []
+        
+        if not pincode_options:
+            st.warning(f"No pincodes found for {selected_city}")
+            pincode = st.text_input("Enter Pincode", help="6-digit pincode", key="patient_pincode_manual")
+        else:
+            pincode = st.selectbox(
+                "Pincode",
+                pincode_options,
+                help=f"Available pincodes for {selected_city}",
+                key="patient_pincode"
+            )
+    
+    st.markdown("### 📝 Patient Information")
     with st.form("patient_intake_form"):
         col1, col2 = st.columns([1, 1])
         with col1:
@@ -205,23 +227,9 @@ def patient_intake_page():
                 value=datetime(1985, 1, 1).date(),
                 max_value=datetime.now().date(),
             )
-            gender = st.selectbox("Gender", ["M", "F", "U"], help="M = Male, F = Female, U = Unspecified")
-
+        
         with col2:
-            selected_city = st.selectbox("City", city_options)
-            # Filter pincodes by selected city (case-sensitive column name "city")
-            city_pin_df = zip_df[zip_df["city"] == selected_city]
-            pincode_options = city_pin_df["pincode"].tolist() if not city_pin_df.empty else []
-            
-            if not pincode_options:
-                st.warning(f"No pincodes found for {selected_city}")
-                pincode = st.text_input("Enter Pincode", help="6-digit pincode")
-            else:
-                pincode = st.selectbox(
-                    "Pincode",
-                    pincode_options,
-                    help=f"Available pincodes for {selected_city}",
-                )
+            gender = st.selectbox("Gender", ["M", "F", "U"], help="M = Male, F = Female, U = Unspecified")
 
         symptom_labels = list(symptom_display.keys())
         default_symptoms = symptom_labels[:1] if symptom_labels else []
@@ -294,6 +302,27 @@ def xray_analysis_page():
         st.error("❌ **Backend API is offline!** Please start it first: `python api/main.py`")
         return
     
+    # Location selection OUTSIDE form for dynamic updates
+    st.markdown("### � Location Selection")
+    loc_col1, loc_col2 = st.columns(2)
+    with loc_col1:
+        selected_city = st.selectbox("City", zip_df["city"].unique().tolist(), help="Select your city", key="xray_city")
+    with loc_col2:
+        # Filter pincodes by selected city
+        city_subset = zip_df[zip_df["city"] == selected_city]
+        pincode_options = city_subset["pincode"].tolist() if not city_subset.empty else []
+        
+        if not pincode_options:
+            st.warning(f"No pincodes found for {selected_city}")
+            zip_code = st.text_input("Enter ZIP/PIN Code", help="6-digit pincode", key="xray_pincode_manual")
+        else:
+            zip_code = st.selectbox(
+                "ZIP / PIN Code",
+                pincode_options,
+                help=f"Available pincodes for {selected_city} - helps pharmacy matcher",
+                key="xray_pincode"
+            )
+    
     # Input form
     with st.form("xray_form"):
         col1, col2 = st.columns([1, 1])
@@ -302,20 +331,6 @@ def xray_analysis_page():
             st.markdown("#### 📋 Patient Snapshot")
             age = st.number_input("Age", min_value=1, max_value=120, value=40, help="Required for dosage safety checks")
             gender = st.selectbox("Gender", ["M", "F", "U"], help="Used for anonymised patient context")
-            selected_city = st.selectbox("City", zip_df["city"].unique().tolist(), help="Loaded from sample zipcode coverage")
-            # Filter pincodes by selected city
-            city_subset = zip_df[zip_df["city"] == selected_city]
-            pincode_options = city_subset["pincode"].tolist() if not city_subset.empty else []
-            
-            if not pincode_options:
-                st.warning(f"No pincodes found for {selected_city}")
-                zip_code = st.text_input("Enter ZIP/PIN Code", help="6-digit pincode")
-            else:
-                zip_code = st.selectbox(
-                    "ZIP / PIN Code",
-                    pincode_options,
-                    help=f"Available pincodes for {selected_city} - helps pharmacy matcher",
-                )
             selected_meds = st.multiselect(
                 "Current Medications",
                 med_names,
@@ -363,7 +378,7 @@ def xray_analysis_page():
         # Show uploaded image
         col1, col2 = st.columns([1, 2])
         with col1:
-            st.image(xray_file, caption="Uploaded X-Ray", use_column_width=True)
+            st.image(xray_file, caption="Uploaded X-Ray", use_container_width=True)
         
         with col2:
             st.markdown("### 🔄 Processing Pipeline")
