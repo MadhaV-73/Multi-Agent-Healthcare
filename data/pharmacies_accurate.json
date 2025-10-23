@@ -4379,6 +4379,39 @@
     "verified": true
   },
   {
+    "id": "ph69543",
+    "name": "Sun Pharma Outlet Kamothe",
+    "lat": 19.015094,
+    "lon": 73.094772,
+    "city": "Navi Mumbai",
+    "pincode": "410206",
+    "area": "Kamothe",
+    "district": "Raigad",
+    "services": [
+      "home_delivery"
+    ],
+    "delivery_km": 7,
+    "rating": 4.3,
+    "verified": false
+  },
+  {
+    "id": "ph56643",
+    "name": "PharmEasy Store Kamothe 2",
+    "lat": 19.021523,
+    "lon": 73.097482,
+    "city": "Navi Mumbai",
+    "pincode": "410206",
+    "area": "Kamothe",
+    "district": "Raigad",
+    "services": [
+      "home_delivery",
+      "consultation"
+    ],
+    "delivery_km": 10,
+    "rating": 3.7,
+    "verified": true
+  },
+  {
     "id": "ph63895",
     "name": "PharmEasy Store Kalyan",
     "lat": 19.236709,
@@ -4428,6 +4461,56 @@
     ],
     "delivery_km": 10,
     "rating": 4.0,
+    "verified": true
+  },
+  {
+    "id": "ph99870",
+    "name": "VitalRx Kalyan",
+    "lat": 19.242768,
+    "lon": 73.156816,
+    "city": "Kalyan",
+    "pincode": "421302",
+    "area": "Kalyan East",
+    "district": "Thane",
+    "services": [
+      "home_delivery"
+    ],
+    "delivery_km": 10,
+    "rating": 3.5,
+    "verified": true
+  },
+  {
+    "id": "ph31329",
+    "name": "MediMax Kalyan 2",
+    "lat": 19.239925,
+    "lon": 73.157853,
+    "city": "Kalyan",
+    "pincode": "421302",
+    "area": "Kalyan East",
+    "district": "Thane",
+    "services": [
+      "online_ordering",
+      "consultation"
+    ],
+    "delivery_km": 5,
+    "rating": 5.0,
+    "verified": true
+  },
+  {
+    "id": "ph68843",
+    "name": "Fortis Pharmacy Kalyan 3",
+    "lat": 19.237924,
+    "lon": 73.154592,
+    "city": "Kalyan",
+    "pincode": "421302",
+    "area": "Kalyan East",
+    "district": "Thane",
+    "services": [
+      "online_ordering",
+      "consultation"
+    ],
+    "delivery_km": 7,
+    "rating": 3.7,
     "verified": true
   },
   {
@@ -4637,6 +4720,58 @@
     "verified": true
   },
   {
+    "id": "ph80718",
+    "name": "HealthFirst Bhiwandi",
+    "lat": 19.298549,
+    "lon": 73.065465,
+    "city": "Bhiwandi",
+    "pincode": "421302",
+    "area": "Bhiwandi City",
+    "district": "Thane",
+    "services": [
+      "24x7",
+      "home_delivery"
+    ],
+    "delivery_km": 15,
+    "rating": 4.5,
+    "verified": true
+  },
+  {
+    "id": "ph89119",
+    "name": "HealthBuddy Bhiwandi 2",
+    "lat": 19.294693,
+    "lon": 73.068667,
+    "city": "Bhiwandi",
+    "pincode": "421302",
+    "area": "Bhiwandi City",
+    "district": "Thane",
+    "services": [
+      "online_ordering",
+      "consultation"
+    ],
+    "delivery_km": 10,
+    "rating": 3.7,
+    "verified": false
+  },
+  {
+    "id": "ph87876",
+    "name": "Apollo Pharmacy Bhiwandi 3",
+    "lat": 19.298011,
+    "lon": 73.070021,
+    "city": "Bhiwandi",
+    "pincode": "421302",
+    "area": "Bhiwandi City",
+    "district": "Thane",
+    "services": [
+      "home_delivery",
+      "online_ordering",
+      "consultation"
+    ],
+    "delivery_km": 10,
+    "rating": 3.8,
+    "verified": true
+  },
+  {
     "id": "ph92931",
     "name": "Sun Pharma Outlet Bhiwandi",
     "lat": 19.29357,
@@ -4739,6 +4874,39 @@
     "delivery_km": 5,
     "rating": 4.3,
     "verified": true
+  },
+  {
+    "id": "ph36679",
+    "name": "MedPlus New",
+    "lat": 19.030008,
+    "lon": 73.096323,
+    "city": "Panvel",
+    "pincode": "410206",
+    "area": "New Panvel",
+    "district": "Raigad",
+    "services": [
+      "home_delivery",
+      "consultation"
+    ],
+    "delivery_km": 15,
+    "rating": 4.0,
+    "verified": true
+  },
+  {
+    "id": "ph74097",
+    "name": "PharmaOne New 2",
+    "lat": 19.036491,
+    "lon": 73.096949,
+    "city": "Panvel",
+    "pincode": "410206",
+    "area": "New Panvel",
+    "district": "Raigad",
+    "services": [
+      "home_delivery"
+    ],
+    "delivery_km": 7,
+    "rating": 3.8,
+    "verified": false
   },
   {
     "id": "ph11080",
@@ -7701,106 +7869,6 @@
     ],
     "delivery_km": 7,
     "rating": 4.6,
-    "verified": true
-  },
-  {
-    "id": "ph49998",
-    "name": "LifeCare Chemist Bhiwandi",
-    "lat": 19.294514,
-    "lon": 73.061771,
-    "city": "Bhiwandi",
-    "pincode": "421302",
-    "area": "Bhiwandi City",
-    "district": "Thane",
-    "services": [
-      "24x7",
-      "home_delivery"
-    ],
-    "delivery_km": 7,
-    "rating": 4.8,
-    "verified": true
-  },
-  {
-    "id": "ph72382",
-    "name": "LifeCare Chemist Bhiwandi 2",
-    "lat": 19.299917,
-    "lon": 73.063223,
-    "city": "Bhiwandi",
-    "pincode": "421302",
-    "area": "Bhiwandi City",
-    "district": "Thane",
-    "services": [
-      "home_delivery"
-    ],
-    "delivery_km": 5,
-    "rating": 4.8,
-    "verified": true
-  },
-  {
-    "id": "ph96909",
-    "name": "HealthFirst Bhiwandi 3",
-    "lat": 19.302094,
-    "lon": 73.060319,
-    "city": "Bhiwandi",
-    "pincode": "421302",
-    "area": "Bhiwandi City",
-    "district": "Thane",
-    "services": [
-      "home_delivery"
-    ],
-    "delivery_km": 5,
-    "rating": 4.8,
-    "verified": true
-  },
-  {
-    "id": "ph96712",
-    "name": "MedPlus Kamothe",
-    "lat": 19.024839,
-    "lon": 73.09107,
-    "city": "Panvel",
-    "pincode": "410206",
-    "area": "Kamothe",
-    "district": "Raigad",
-    "services": [
-      "24x7",
-      "home_delivery"
-    ],
-    "delivery_km": 7,
-    "rating": 3.9,
-    "verified": true
-  },
-  {
-    "id": "ph16427",
-    "name": "1mg Store Kamothe 2",
-    "lat": 19.023835,
-    "lon": 73.089778,
-    "city": "Panvel",
-    "pincode": "410206",
-    "area": "Kamothe",
-    "district": "Raigad",
-    "services": [
-      "home_delivery",
-      "online_ordering"
-    ],
-    "delivery_km": 7,
-    "rating": 4.6,
-    "verified": true
-  },
-  {
-    "id": "ph42216",
-    "name": "Wellness Forever Kamothe 3",
-    "lat": 19.021609,
-    "lon": 73.08916,
-    "city": "Panvel",
-    "pincode": "410206",
-    "area": "Kamothe",
-    "district": "Raigad",
-    "services": [
-      "24x7",
-      "home_delivery"
-    ],
-    "delivery_km": 5,
-    "rating": 3.8,
     "verified": true
   }
 ]

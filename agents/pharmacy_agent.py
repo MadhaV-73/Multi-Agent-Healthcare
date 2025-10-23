@@ -311,14 +311,17 @@ class PharmacyAgent:
                 pharmacy_dict['distance_km'] = round(distance, 2)
                 
                 # Calculate priority score (lower is better)
-                # Priority: exact pincode match > same city > distance
+                # CRITICAL: Exact pincode must always win, regardless of distance
+                # Priority: exact pincode match >>> same city >> distance
                 priority_score = distance
                 
                 if patient_pincode and str(pharmacy.get('pincode', '')) == str(patient_pincode):
-                    priority_score -= 1000  # Exact pincode match gets highest priority
+                    # Exact pincode match gets massive priority boost - guaranteed to be first
+                    priority_score -= 100000  # Extremely high priority
                     pharmacy_dict['location_match'] = 'exact_pincode'
                 elif patient_city and str(pharmacy.get('city', '')).lower() == str(patient_city).lower():
-                    priority_score -= 500  # Same city gets second priority
+                    # Same city gets moderate priority
+                    priority_score -= 10000  # High priority but less than exact pincode
                     pharmacy_dict['location_match'] = 'same_city'
                 else:
                     pharmacy_dict['location_match'] = 'nearby'
@@ -422,18 +425,23 @@ class PharmacyAgent:
     
     def _select_best_pharmacy(self, pharmacy_matches: List[Dict]) -> Dict:
         """
-        Select the best pharmacy based on stock availability and distance.
+        Select the best pharmacy based on location match, stock availability, and distance.
 
         Priority:
-        1. Full stock availability (100%)
-        2. Closest distance
-        3. Partial stock if no full stock available
+        1. Location match (exact pincode > same city > nearby)
+        2. Full stock availability (100%)
+        3. Closest distance
         """
         if not pharmacy_matches:
             raise ValueError("No pharmacy matches available")
 
+        # Sort by priority_score (which includes location priority), then stock, then distance
         pharmacy_matches.sort(
-            key=lambda x: (-x['stock_percentage'], x['distance_km'])
+            key=lambda x: (
+                x.get('priority_score', 999999),  # Lower priority_score is better (exact pincode has -100000)
+                -x['stock_percentage'],            # Higher stock % is better
+                x['distance_km']                   # Lower distance is better
+            )
         )
 
         best = pharmacy_matches[0]
@@ -441,7 +449,7 @@ class PharmacyAgent:
         self._log(
             "INFO",
             f"Selected {best['name']}: {best['stock_percentage']:.0f}% stock, "
-            f"{best['distance_km']:.1f}km away"
+            f"{best['distance_km']:.1f}km away, match: {best.get('location_match', 'unknown')}"
         )
 
         return best

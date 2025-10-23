@@ -336,7 +336,6 @@ def xray_analysis_page():
                 med_names,
                 help="Choose from sample OTC catalog",
             )
-            custom_med_entry = st.text_input("Add another medication", placeholder="Comma separated if multiple")
 
         with col2:
             st.markdown("#### 🩺 Presenting Symptoms")
@@ -360,7 +359,6 @@ def xray_analysis_page():
                 allergy_choices,
                 help="Known sensitizers from sample OTC catalog",
             )
-            custom_allergy_entry = st.text_input("Add another allergy", placeholder="Comma separated if multiple")
 
         st.markdown("---")
         st.markdown("#### 🩻 Upload evidence")
@@ -405,16 +403,10 @@ def xray_analysis_page():
                 "city": selected_city,
             }
             allergy_list = [allergy_display.get(label, label) for label in selected_allergies]
-            if custom_allergy_entry:
-                allergy_list.extend(
-                    [entry.strip() for entry in custom_allergy_entry.split(",") if entry.strip()]
-                )
             if allergy_list:
                 patient_profile["allergies"] = allergy_list
 
             med_list = list(selected_meds)
-            if custom_med_entry:
-                med_list.extend([entry.strip() for entry in custom_med_entry.split(",") if entry.strip()])
             if med_list:
                 patient_profile["current_medications"] = med_list
 
