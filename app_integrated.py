@@ -365,7 +365,30 @@ def xray_analysis_page():
             )
 
         st.markdown("---")
-        st.markdown("#### 🩻 Upload evidence")
+        st.markdown("#### 📍 Location Selection")
+        st.caption("Select your city and pincode for accurate pharmacy matching")
+        
+        loc_col1, loc_col2 = st.columns(2)
+        with loc_col1:
+            selected_city = st.selectbox("City", zip_df["city"].unique().tolist(), help="Select your city", key="xray_city")
+        with loc_col2:
+            # Filter pincodes by selected city
+            city_subset = zip_df[zip_df["city"] == selected_city]
+            pincode_options = city_subset["pincode"].tolist() if not city_subset.empty else []
+            
+            if not pincode_options:
+                st.warning(f"No pincodes found for {selected_city}")
+                zip_code = st.text_input("Enter ZIP/PIN Code", help="6-digit pincode", key="xray_pincode_manual")
+            else:
+                zip_code = st.selectbox(
+                    "ZIP / PIN Code",
+                    pincode_options,
+                    help=f"Available pincodes for {selected_city} - helps pharmacy matcher",
+                    key="xray_pincode"
+                )
+
+        st.markdown("---")
+        st.markdown("#### 🩻 X-Ray for Analysis")
         
         # Check if demo X-ray should be loaded
         if st.session_state.get('use_demo_xray', False):
@@ -393,29 +416,6 @@ def xray_analysis_page():
         )
 
         submitted = st.form_submit_button("🚀 Run complete agent pipeline", use_container_width=True)
-    
-    # Location selection AFTER form for better UX
-    st.markdown("### 📍 Location Selection")
-    st.caption("Select your city and pincode for accurate pharmacy matching")
-    
-    loc_col1, loc_col2 = st.columns(2)
-    with loc_col1:
-        selected_city = st.selectbox("City", zip_df["city"].unique().tolist(), help="Select your city", key="xray_city")
-    with loc_col2:
-        # Filter pincodes by selected city
-        city_subset = zip_df[zip_df["city"] == selected_city]
-        pincode_options = city_subset["pincode"].tolist() if not city_subset.empty else []
-        
-        if not pincode_options:
-            st.warning(f"No pincodes found for {selected_city}")
-            zip_code = st.text_input("Enter ZIP/PIN Code", help="6-digit pincode", key="xray_pincode_manual")
-        else:
-            zip_code = st.selectbox(
-                "ZIP / PIN Code",
-                pincode_options,
-                help=f"Available pincodes for {selected_city} - helps pharmacy matcher",
-                key="xray_pincode"
-            )
     
     # Use demo X-ray if loaded, otherwise use uploaded file
     if st.session_state.get('use_demo_xray', False) and xray_file is None:
