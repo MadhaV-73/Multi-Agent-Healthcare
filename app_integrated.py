@@ -302,26 +302,30 @@ def xray_analysis_page():
         st.error("❌ **Backend API is offline!** Please start it first: `python api/main.py`")
         return
     
-    # Location selection OUTSIDE form for dynamic updates
-    st.markdown("### � Location Selection")
-    loc_col1, loc_col2 = st.columns(2)
-    with loc_col1:
-        selected_city = st.selectbox("City", zip_df["city"].unique().tolist(), help="Select your city", key="xray_city")
-    with loc_col2:
-        # Filter pincodes by selected city
-        city_subset = zip_df[zip_df["city"] == selected_city]
-        pincode_options = city_subset["pincode"].tolist() if not city_subset.empty else []
-        
-        if not pincode_options:
-            st.warning(f"No pincodes found for {selected_city}")
-            zip_code = st.text_input("Enter ZIP/PIN Code", help="6-digit pincode", key="xray_pincode_manual")
+    # Demo X-ray section
+    st.markdown("### 🎯 Try Demo X-Ray")
+    demo_col1, demo_col2 = st.columns([1, 3])
+    
+    with demo_col1:
+        demo_path = Path("uploads/demo_xray.png")
+        if demo_path.exists():
+            st.image(str(demo_path), caption="Demo X-Ray", use_container_width=True)
+            if st.button("📥 Load Demo X-Ray", use_container_width=True):
+                st.session_state.use_demo_xray = True
+                st.rerun()
         else:
-            zip_code = st.selectbox(
-                "ZIP / PIN Code",
-                pincode_options,
-                help=f"Available pincodes for {selected_city} - helps pharmacy matcher",
-                key="xray_pincode"
-            )
+            st.info("Demo X-ray not available")
+    
+    with demo_col2:
+        st.markdown("""
+        **Quick Demo Test Case:**
+        - Click "Load Demo X-Ray" to automatically use this sample chest X-ray
+        - Pre-filled with sample patient data
+        - Perfect for testing the AI analysis pipeline
+        - Shows how the system detects respiratory conditions
+        """)
+    
+    st.markdown("---")
     
     # Input form
     with st.form("xray_form"):
@@ -362,6 +366,24 @@ def xray_analysis_page():
 
         st.markdown("---")
         st.markdown("#### 🩻 Upload evidence")
+        
+        # Check if demo X-ray should be loaded
+        if st.session_state.get('use_demo_xray', False):
+            demo_path = Path("uploads/demo_xray.png")
+            if demo_path.exists():
+                with open(demo_path, 'rb') as f:
+                    demo_bytes = f.read()
+                st.success("✅ Demo X-ray loaded! Click submit to analyze.")
+                st.image(demo_bytes, caption="Demo X-Ray Loaded", width=200)
+                # Create a file-like object for the demo
+                import io
+                xray_file_default = io.BytesIO(demo_bytes)
+                xray_file_default.name = "demo_xray.png"
+            else:
+                xray_file_default = None
+        else:
+            xray_file_default = None
+        
         xray_file = st.file_uploader("Chest X-ray (PNG/JPG)", type=['png', 'jpg', 'jpeg'])
         report_files = st.file_uploader(
             "Optional supporting documents (PDF/PNG/JPG)",
@@ -371,6 +393,41 @@ def xray_analysis_page():
         )
 
         submitted = st.form_submit_button("🚀 Run complete agent pipeline", use_container_width=True)
+    
+    # Location selection AFTER form for better UX
+    st.markdown("### 📍 Location Selection")
+    st.caption("Select your city and pincode for accurate pharmacy matching")
+    
+    loc_col1, loc_col2 = st.columns(2)
+    with loc_col1:
+        selected_city = st.selectbox("City", zip_df["city"].unique().tolist(), help="Select your city", key="xray_city")
+    with loc_col2:
+        # Filter pincodes by selected city
+        city_subset = zip_df[zip_df["city"] == selected_city]
+        pincode_options = city_subset["pincode"].tolist() if not city_subset.empty else []
+        
+        if not pincode_options:
+            st.warning(f"No pincodes found for {selected_city}")
+            zip_code = st.text_input("Enter ZIP/PIN Code", help="6-digit pincode", key="xray_pincode_manual")
+        else:
+            zip_code = st.selectbox(
+                "ZIP / PIN Code",
+                pincode_options,
+                help=f"Available pincodes for {selected_city} - helps pharmacy matcher",
+                key="xray_pincode"
+            )
+    
+    # Use demo X-ray if loaded, otherwise use uploaded file
+    if st.session_state.get('use_demo_xray', False) and xray_file is None:
+        demo_path = Path("uploads/demo_xray.png")
+        if demo_path.exists():
+            with open(demo_path, 'rb') as f:
+                demo_bytes = f.read()
+            import io
+            xray_file = io.BytesIO(demo_bytes)
+            xray_file.name = "demo_xray.png"
+            # Reset the flag
+            st.session_state.use_demo_xray = False
     
     if submitted and xray_file:
         # Show uploaded image
