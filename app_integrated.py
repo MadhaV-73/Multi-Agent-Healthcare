@@ -26,6 +26,17 @@ if not API_BASE_URL:
 API_BASE_URL = API_BASE_URL.rstrip("/")
 
 
+def get_demo_xray_path() -> Path:
+    """Get the absolute path to the demo X-ray image."""
+    # Try to get script directory, fallback to current working directory
+    try:
+        script_dir = Path(__file__).parent.resolve()
+    except (NameError, OSError):
+        script_dir = Path.cwd()
+    
+    return script_dir / "uploads" / "demo_xray.png"
+
+
 @st.cache_data(show_spinner=False)
 def load_zip_data() -> pd.DataFrame:
     """Load sample zipcode coverage from the data folder - Only Mumbai region with pharmacy coverage."""
@@ -307,14 +318,18 @@ def xray_analysis_page():
     demo_col1, demo_col2 = st.columns([1, 3])
     
     with demo_col1:
-        demo_path = Path("uploads/demo_xray.png")
+        # Use absolute path helper function
+        demo_path = get_demo_xray_path()
+        
         if demo_path.exists():
             st.image(str(demo_path), caption="Demo X-Ray", use_container_width=True)
             if st.button("📥 Load Demo X-Ray", use_container_width=True):
                 st.session_state.use_demo_xray = True
                 st.rerun()
         else:
-            st.info("Demo X-ray not available")
+            st.error(f"❌ Demo X-ray not found!")
+            st.caption(f"Looking for: {demo_path}")
+            st.caption("Please ensure demo_xray.png is in the uploads folder")
     
     with demo_col2:
         st.markdown("""
@@ -392,7 +407,7 @@ def xray_analysis_page():
         
         # Check if demo X-ray should be loaded
         if st.session_state.get('use_demo_xray', False):
-            demo_path = Path("uploads/demo_xray.png")
+            demo_path = get_demo_xray_path()
             if demo_path.exists():
                 with open(demo_path, 'rb') as f:
                     demo_bytes = f.read()
@@ -404,6 +419,7 @@ def xray_analysis_page():
                 xray_file_default.name = "demo_xray.png"
             else:
                 xray_file_default = None
+                st.error(f"❌ Demo file not found: {demo_path}")
         else:
             xray_file_default = None
         
@@ -419,7 +435,7 @@ def xray_analysis_page():
     
     # Use demo X-ray if loaded, otherwise use uploaded file
     if st.session_state.get('use_demo_xray', False) and xray_file is None:
-        demo_path = Path("uploads/demo_xray.png")
+        demo_path = get_demo_xray_path()
         if demo_path.exists():
             with open(demo_path, 'rb') as f:
                 demo_bytes = f.read()
