@@ -177,6 +177,7 @@ logs/
 # Uploaded files
 uploads/
 !uploads/.gitkeep
+!uploads/demo_xray.png
 
 # Model files (if large)
 models/*.h5
