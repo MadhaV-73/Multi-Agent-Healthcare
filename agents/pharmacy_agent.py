@@ -49,7 +49,7 @@ class PharmacyAgent:
         
         # Configuration
         self.max_search_radius_km = 25
-        self.delivery_speed_kmph = 30  # Average delivery speed
+        self.delivery_speed_kmph = 25  # Average urban delivery speed
         self.base_delivery_fee = 25  # Base fee in rupees
         self.per_km_charge = 5  # Additional charge per km
         
@@ -536,12 +536,29 @@ class PharmacyAgent:
         
         Returns:
             ETA in minutes
+        
+        Formula:
+        - Travel time at 25 km/h average speed
+        - Preparation time: 10 minutes base + 2 min per km
+        - Traffic buffer: 10% of travel time
+        - Rounded up to nearest 5 minutes
         """
-        travel_time = (distance_km / self.delivery_speed_kmph) * 60
-        preparation_time = 15
-        traffic_buffer = travel_time * 0.1
-        total_time = travel_time + preparation_time + traffic_buffer
+        # Travel time at average urban speed
+        travel_time_minutes = (distance_km / self.delivery_speed_kmph) * 60
+        
+        # Dynamic preparation time based on distance
+        # Close pharmacies are faster (just pick and go), far ones need more prep
+        preparation_time = 10 + (distance_km * 2)  # Base 10 min + 2 min per km
+        
+        # Traffic buffer - 10% of travel time
+        traffic_buffer = travel_time_minutes * 0.1
+        
+        # Total ETA
+        total_time = travel_time_minutes + preparation_time + traffic_buffer
+        
+        # Round up to nearest 5 minutes
         eta = math.ceil(total_time / 5) * 5
+        
         return int(eta)
 
     def _calculate_delivery_fee(self, distance_km: float) -> float:
