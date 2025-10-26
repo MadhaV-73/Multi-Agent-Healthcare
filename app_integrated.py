@@ -39,7 +39,7 @@ def get_demo_xray_path() -> Path:
 
 @st.cache_data(show_spinner=False)
 def load_zip_data() -> pd.DataFrame:
-    """Load sample zipcode coverage from the data folder - Mumbai region with pharmacy coverage."""
+    """Load zipcode coverage from the data folder - All available cities."""
     # Try accurate version first
     path = Path("data/zipcodes_accurate.csv")
     if not path.exists():
@@ -47,9 +47,7 @@ def load_zip_data() -> pd.DataFrame:
     
     df = pd.read_csv(path)
     
-    # Filter to only Mumbai - we have pharmacies only in Mumbai metropolitan region
-    df = df[df["city"] == "Mumbai"].copy()
-    
+    # Keep all cities - pharmacies available across multiple cities
     df["pincode"] = df["pincode"].astype(str)
     df["label"] = df["city"] + " – " + df["pincode"]
     return df.sort_values(["city", "pincode"]).reset_index(drop=True)
