@@ -170,8 +170,11 @@ class PharmacyAgent:
             return self._error_response(str(e))
     
     def _load_pharmacies(self) -> pd.DataFrame:
-        """Load pharmacies database."""
-        pharmacy_file = self.data_dir / "pharmacies.json"
+        """Load pharmacies database - try accurate version first."""
+        # Try accurate version first, fallback to regular
+        pharmacy_file = self.data_dir / "pharmacies_accurate.json"
+        if not pharmacy_file.exists():
+            pharmacy_file = self.data_dir / "pharmacies.json"
         
         if not pharmacy_file.exists():
             raise FileNotFoundError(f"Pharmacies database not found: {pharmacy_file}")
@@ -180,30 +183,39 @@ class PharmacyAgent:
             data = json.load(f)
         
         df = pd.DataFrame(data)
-        self._log("INFO", f"Loaded {len(df)} pharmacies")
+        self._log("INFO", f"Loaded {len(df)} pharmacies from {pharmacy_file.name}")
         return df
     
     def _load_inventory(self) -> pd.DataFrame:
-        """Load inventory database."""
-        inventory_file = self.data_dir / "inventory.csv"
+        """Load inventory database - try accurate version first."""
+        # Try accurate version first, fallback to regular
+        inventory_file = self.data_dir / "inventory_accurate.csv"
+        if not inventory_file.exists():
+            inventory_file = self.data_dir / "inventory.csv"
         
         if not inventory_file.exists():
             raise FileNotFoundError(f"Inventory database not found: {inventory_file}")
         
         df = pd.read_csv(inventory_file)
-        self._log("INFO", f"Loaded {len(df)} inventory records")
+        # Rename column if needed for consistency
+        if 'qty_available' in df.columns:
+            df = df.rename(columns={'qty_available': 'qty'})
+        self._log("INFO", f"Loaded {len(df)} inventory records from {inventory_file.name}")
         return df
     
     def _load_zipcodes(self) -> pd.DataFrame:
-        """Load zipcodes database."""
-        zipcode_file = self.data_dir / "zipcodes.csv"
+        """Load zipcodes database - try accurate version first."""
+        # Try accurate version first, fallback to regular
+        zipcode_file = self.data_dir / "zipcodes_accurate.csv"
+        if not zipcode_file.exists():
+            zipcode_file = self.data_dir / "zipcodes.csv"
         
         if not zipcode_file.exists():
             self._log("WARNING", f"Zipcodes database not found: {zipcode_file}")
             return pd.DataFrame(columns=['pincode', 'lat', 'lon'])
         
         df = pd.read_csv(zipcode_file)
-        self._log("INFO", f"Loaded {len(df)} zipcodes")
+        self._log("INFO", f"Loaded {len(df)} zipcodes from {zipcode_file.name}")
         return df
     
     def _get_coordinates(self, pincode: str) -> Optional[Tuple[float, float]]:
@@ -376,7 +388,7 @@ class PharmacyAgent:
         
         Args:
             pharmacies: List of nearby pharmacies
-            otc_options: List of required medicines with SKUs
+            therapy_map: Dict mapping SKU to therapy details
             
         Returns:
             List of pharmacies with stock information
@@ -399,17 +411,23 @@ class PharmacyAgent:
             for sku in required_skus:
                 item = pharmacy_inventory[pharmacy_inventory['sku'] == sku]
 
-                if not item.empty and item.iloc[0]['qty'] > 0:
+                # Check if item exists and has stock (handle both 'qty' and 'qty_available' columns)
+                qty_col = 'qty' if 'qty' in item.columns else 'qty_available'
+                
+                if not item.empty and item.iloc[0][qty_col] > 0:
                     therapy_details = therapy_map.get(sku, {})
-                    available_items.append({
+                    
+                    # Build item dict - handle missing columns gracefully
+                    item_dict = {
                         'sku': sku,
-                        'drug_name': item.iloc[0]['drug_name'],
-                        'form': item.iloc[0]['form'],
-                        'strength': item.iloc[0]['strength'],
-                        'price': float(item.iloc[0]['price']),
-                        'qty_available': int(item.iloc[0]['qty']),
+                        'drug_name': item.iloc[0].get('drug_name', sku),
+                        'form': item.iloc[0].get('form', 'Unknown'),
+                        'strength': item.iloc[0].get('strength', 'N/A'),
+                        'price': float(item.iloc[0].get('price', 0)),
+                        'qty_available': int(item.iloc[0][qty_col]),
                         'therapy_details': therapy_details
-                    })
+                    }
+                    available_items.append(item_dict)
                 else:
                     missing_items.append(sku)
 
@@ -421,6 +439,7 @@ class PharmacyAgent:
                 pharmacy_copy['stock_percentage'] = len(available_items) / len(required_skus) * 100
                 matches.append(pharmacy_copy)
 
+        self._log("INFO", f"Found {len(matches)} pharmacies with stock availability")
         return matches
     
     def _select_best_pharmacy(self, pharmacy_matches: List[Dict]) -> Dict:

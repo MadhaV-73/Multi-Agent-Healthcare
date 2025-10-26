@@ -39,12 +39,16 @@ def get_demo_xray_path() -> Path:
 
 @st.cache_data(show_spinner=False)
 def load_zip_data() -> pd.DataFrame:
-    """Load sample zipcode coverage from the data folder - Only Mumbai region with pharmacy coverage."""
-    path = Path("data/zipcodes.csv")
+    """Load sample zipcode coverage from the data folder - Mumbai region with pharmacy coverage."""
+    # Try accurate version first
+    path = Path("data/zipcodes_accurate.csv")
+    if not path.exists():
+        path = Path("data/zipcodes.csv")
+    
     df = pd.read_csv(path)
     
-    # Filter out Ahmedabad - we only have pharmacies in Mumbai metropolitan region
-    df = df[df["city"] != "Ahmedabad"].copy()
+    # Filter to only Mumbai - we have pharmacies only in Mumbai metropolitan region
+    df = df[df["city"] == "Mumbai"].copy()
     
     df["pincode"] = df["pincode"].astype(str)
     df["label"] = df["city"] + " – " + df["pincode"]
@@ -211,21 +215,22 @@ def patient_intake_page():
     st.markdown("### 📍 Location")
     loc_col1, loc_col2 = st.columns(2)
     with loc_col1:
-        selected_city = st.selectbox("City", city_options, key="patient_city")
+        selected_city = st.selectbox("City", city_options, key="patient_city_intake", index=0)
     with loc_col2:
-        # Filter pincodes by selected city (case-sensitive column name "city")
+        # Filter pincodes by selected city - FIXED: uses correct column name
         city_pin_df = zip_df[zip_df["city"] == selected_city]
         pincode_options = city_pin_df["pincode"].tolist() if not city_pin_df.empty else []
         
         if not pincode_options:
             st.warning(f"No pincodes found for {selected_city}")
-            pincode = st.text_input("Enter Pincode", help="6-digit pincode", key="patient_pincode_manual")
+            pincode = st.text_input("Enter Pincode", help="6-digit pincode", key="patient_pincode_manual_intake")
         else:
             pincode = st.selectbox(
                 "Pincode",
                 pincode_options,
                 help=f"Available pincodes for {selected_city}",
-                key="patient_pincode"
+                key="patient_pincode_intake",
+                index=0
             )
     
     st.markdown("### 📝 Patient Information")
@@ -323,8 +328,12 @@ def xray_analysis_page():
         
         if demo_path.exists():
             st.image(str(demo_path), caption="Demo X-Ray", use_container_width=True)
-            if st.button("📥 Load Demo X-Ray", use_container_width=True):
-                st.session_state.use_demo_xray = True
+            if st.button("📥 Load Demo X-Ray", use_container_width=True, key="load_demo_btn"):
+                # Store demo X-ray bytes in session state
+                with open(demo_path, 'rb') as f:
+                    st.session_state.demo_xray_bytes = f.read()
+                    st.session_state.demo_xray_loaded = True
+                st.success("✅ Demo X-ray loaded! Scroll down and click 'Run complete agent pipeline'")
                 st.rerun()
         else:
             st.error(f"❌ Demo X-ray not found!")
@@ -339,6 +348,41 @@ def xray_analysis_page():
         - Perfect for testing the AI analysis pipeline
         - Shows how the system detects respiratory conditions
         """)
+        
+        # Show if demo is loaded
+        if st.session_state.get('demo_xray_loaded', False):
+            st.success("✅ **Demo X-ray is loaded and ready!**")
+            if st.button("🗑️ Clear Demo", key="clear_demo_btn"):
+                st.session_state.demo_xray_loaded = False
+                st.session_state.demo_xray_bytes = None
+                st.rerun()
+    
+    st.markdown("---")
+    
+    # Location selection FIRST - OUTSIDE form for dynamic updates
+    st.markdown("### 📍 Location Selection")
+    st.caption("Select your city and pincode for accurate pharmacy matching")
+    
+    loc_col1, loc_col2 = st.columns(2)
+    with loc_col1:
+        city_options = zip_df["city"].unique().tolist()
+        selected_city = st.selectbox("City", city_options, help="Select your city", key="xray_city_select", index=0)
+    with loc_col2:
+        # Filter pincodes by selected city - THIS WORKS BECAUSE IT'S OUTSIDE THE FORM
+        city_subset = zip_df[zip_df["city"] == selected_city]
+        pincode_options = city_subset["pincode"].tolist() if not city_subset.empty else []
+        
+        if not pincode_options:
+            st.warning(f"No pincodes found for {selected_city}")
+            zip_code = st.text_input("Enter ZIP/PIN Code", help="6-digit pincode", key="xray_pincode_manual_input")
+        else:
+            zip_code = st.selectbox(
+                "ZIP / PIN Code",
+                pincode_options,
+                help=f"Available pincodes for {selected_city} - helps pharmacy matcher",
+                key="xray_pincode_select",
+                index=0
+            )
     
     st.markdown("---")
     
@@ -380,20 +424,18 @@ def xray_analysis_page():
             )
 
         st.markdown("---")
-        st.markdown("#### 🩻 X-Ray for Analysis")
+        st.markdown("####  🩻 X-Ray for Analysis")
         
-        # Check if demo X-ray should be loaded and show it
-        demo_xray_loaded = st.session_state.get('use_demo_xray', False)
+        # Check if demo X-ray is loaded and show it
+        demo_xray_loaded = st.session_state.get('demo_xray_loaded', False)
         if demo_xray_loaded:
-            demo_path = get_demo_xray_path()
-            if demo_path.exists():
-                with open(demo_path, 'rb') as f:
-                    demo_bytes = f.read()
-                st.success("✅ Demo X-ray loaded! This will be used for analysis.")
+            st.success("✅ Demo X-ray loaded! This will be used for analysis.")
+            demo_bytes = st.session_state.get('demo_xray_bytes')
+            if demo_bytes:
                 st.image(demo_bytes, caption="Demo X-Ray Loaded", width=200)
         
         xray_file = st.file_uploader(
-            "Chest X-ray (PNG/JPG)" + (" - Demo already loaded" if demo_xray_loaded else ""),
+            "Chest X-ray (PNG/JPG)" + (" - Demo already loaded, or upload your own" if demo_xray_loaded else ""),
             type=['png', 'jpg', 'jpeg'],
             help="Upload your X-ray or use the demo image loaded above"
         )
@@ -406,52 +448,29 @@ def xray_analysis_page():
 
         submitted = st.form_submit_button("🚀 Run complete agent pipeline", use_container_width=True)
     
-    # Location selection OUTSIDE form for dynamic updates
-    st.markdown("### 📍 Location Selection")
-    st.caption("Select your city and pincode for accurate pharmacy matching")
-    
-    loc_col1, loc_col2 = st.columns(2)
-    with loc_col1:
-        selected_city = st.selectbox("City", zip_df["city"].unique().tolist(), help="Select your city", key="xray_city")
-    with loc_col2:
-        # Filter pincodes by selected city - THIS WORKS NOW BECAUSE IT'S OUTSIDE THE FORM
-        city_subset = zip_df[zip_df["city"] == selected_city]
-        pincode_options = city_subset["pincode"].tolist() if not city_subset.empty else []
-        
-        if not pincode_options:
-            st.warning(f"No pincodes found for {selected_city}")
-            zip_code = st.text_input("Enter ZIP/PIN Code", help="6-digit pincode", key="xray_pincode_manual")
-        else:
-            zip_code = st.selectbox(
-                "ZIP / PIN Code",
-                pincode_options,
-                help=f"Available pincodes for {selected_city} - helps pharmacy matcher",
-                key="xray_pincode"
-            )
-    
-    # Handle demo X-ray loading - USE IT IF LOADED, otherwise use uploaded file
-    if st.session_state.get('use_demo_xray', False) and xray_file is None:
-        demo_path = get_demo_xray_path()
-        if demo_path.exists():
-            with open(demo_path, 'rb') as f:
-                demo_bytes = f.read()
-            import io
-            xray_file = io.BytesIO(demo_bytes)
-            xray_file.name = "demo_xray.png"
-            xray_file.type = "image/png"
-            # Reset the flag after loading
-            st.session_state.use_demo_xray = False
-    
-    # Check if form was submitted AND we have an X-ray (uploaded OR demo)
+    # Handle submission - use demo if loaded, otherwise use uploaded file
     if submitted:
-        if not xray_file:
+        xray_to_use = None
+        xray_filename = None
+        
+        # Priority: uploaded file > demo X-ray
+        if xray_file is not None:
+            xray_to_use = xray_file.getvalue()
+            xray_filename = xray_file.name
+            xray_content_type = xray_file.type
+        elif demo_xray_loaded and st.session_state.get('demo_xray_bytes'):
+            xray_to_use = st.session_state.demo_xray_bytes
+            xray_filename = "demo_xray.png"
+            xray_content_type = "image/png"
+        
+        if not xray_to_use:
             st.error("❌ Please upload an X-ray image or load the demo X-ray first!")
             st.stop()
         
         # Show uploaded/demo image
         col1, col2 = st.columns([1, 2])
         with col1:
-            st.image(xray_file, caption="X-Ray for Analysis", use_container_width=True)
+            st.image(xray_to_use, caption="X-Ray for Analysis", use_container_width=True)
         
         with col2:
             st.markdown("### 🔄 Processing Pipeline")
@@ -460,7 +479,7 @@ def xray_analysis_page():
             
             # Prepare data
             multipart_files = [
-                ('file', (xray_file.name, xray_file.getvalue(), xray_file.type or 'application/octet-stream'))
+                ('file', (xray_filename, xray_to_use, xray_content_type))
             ]
 
             for doc in report_files or []:
@@ -522,6 +541,11 @@ def xray_analysis_page():
                     result = response.json()
                     st.session_state.analysis_result = result
                     
+                    # Clear demo X-ray after successful analysis
+                    if st.session_state.get('demo_xray_loaded', False):
+                        st.session_state.demo_xray_loaded = False
+                        st.session_state.demo_xray_bytes = None
+                    
                     # Display results based on status
                     display_analysis_results(result)
                 else:
@@ -531,9 +555,6 @@ def xray_analysis_page():
                 st.error("⏱️ Request timed out. Please try again.")
             except Exception as e:
                 st.error(f"❌ Error: {str(e)}")
-    
-    elif submitted and not xray_file:
-        st.warning("⚠️ Please upload an X-ray image first!")
 
 def display_analysis_results(result):
     """Display formatted analysis results"""
