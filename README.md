@@ -1,4 +1,8 @@
-# 🫁 Multi-Agent Healthcare Platform - Chest X-Ray Analysis
+# Multi-Agent Healthcare Platform - Chest X-Ray Analysis
+
+
+**TRY THE LIVE DEMO HERE : https://multi-agent-healthcare-nygyjngwo2hvdstsparetv.streamlit.app/**
+
 
 An AI-powered respiratory healthcare platform for **chest X-ray analysis and OTC treatment recommendations** using a multi-agent architecture. Specialized in detecting pneumonia, bronchitis, COVID-19, TB, and providing location-aware pharmacy matching in Mumbai region.
 
@@ -8,7 +12,7 @@ An AI-powered respiratory healthcare platform for **chest X-ray analysis and OTC
 
 **MadhaV** (MadhaV-73)
 - GitHub: [@MadhaV-73](https://github.com/MadhaV-73)
-- Repository: [Multi-Agent-Healthcare-GL](https://github.com/MadhaV-73/Multi-Agent-Healthcare-GL) conditions (Pneumonia, Bronchitis, TB, COVID-19 suspect, Normal)
+- Repository: [Multi-Agent-Healthcare](https://github.com/MadhaV-73/Multi-Agent-Healthcare) conditions (Pneumonia, Bronchitis, TB, COVID-19 suspect, Normal)
 - **🩺 Patient Intake**: Specialized intake for respiratory symptoms and chest analysis
 - **💊 OTC Respiratory Therapy**: Smart recommendations for cough, fever, congestion, breathing issues
 - **🏥 Pharmacy Matching**: Location-aware pharmacy inventory with respiratory medicine stock
@@ -99,7 +103,7 @@ Frontend (Streamlit) ←→ Backend API (FastAPI) ←→ Multi-Agent Pipeline
 
 #### 1️⃣ Clone or Download the Repository
 ```powershell
-git clone https://github.com/MadhaV-73/Multi-Agent-Healthcare-GL.git
+git clone https://github.com/MadhaV-73/Multi-Agent-Healthcare.git
 cd Multi-Agent-Healthcare-GL
 ```
 
@@ -403,10 +407,7 @@ DEBUG_CONFIG = {
 
 ## 📚 Additional Resources
 
-- **Live Backend API**: https://multi-agent-healthcare-gl-1.onrender.com
-- [API Documentation](https://multi-agent-healthcare-gl-1.onrender.com/docs) - Interactive Swagger UI
-- [Architecture Overview](docs/TARGET_ARCHITECTURE.md) - System architecture details
-- [Deployment Guide](DEPLOYMENT_INSTRUCTIONS.md) - Production deployment instructions
+- **Live Backend API**: https://multi-agent-healthcare.onrender.com
 
 ## 🔐 Security & Privacy
 
@@ -430,8 +431,8 @@ This project is part of a multi-agent healthcare system demonstration for educat
 
 ## �‍💻 Author
 
-**Parth** (parth3083)
-- GitHub: [@parth3083](https://github.com/parth3083)
+**Madhav** (MadhaV-73)
+- GitHub: [@MadhaV-73](https://github.com/MadhaV-73)
 
 ## 🤝 Contributing
 
@@ -457,10 +458,8 @@ For issues or questions:
 - 🖥️ **Frontend UI**: http://localhost:8501
 
 ### Production (Deployed):
-- 🚀 **Live Backend**: https://multi-agent-healthcare-gl-1.onrender.com
-- � **Live API Docs**: https://multi-agent-healthcare-gl-1.onrender.com/docs
-- 📊 **GitHub Repository**: https://github.com/MadhaV-73/Multi-Agent-Healthcare-GL
+- 🚀 **Live Backend**: https://multi-agent-healthcare.onrender.com
+- � **Live API Docs**: https://multi-agent-healthcare.onrender.com/docs
+- 📊 **GitHub Repository**: https://github.com/MadhaV-73/Multi-Agent-Healthcare
 
 ---
-
-**Made with ❤️ for healthcare innovation** 🏥
